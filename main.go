@@ -1,17 +1,22 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"personal-web/connection"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
 	route := mux.NewRouter()
+
+	connection.DatabaseConnect()
 
 	//route untuk menginisialisai folder public
 	route.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public"))))
@@ -30,10 +35,12 @@ func main() {
 }
 
 type Blog struct {
-	Title   string
-	Content string
-	PostAt  string
-	Author  string
+	ID        int
+	Title     string
+	Content   string
+	Image     string
+	Post_date time.Time
+	Author    string
 }
 
 // var blogs = []
@@ -41,8 +48,8 @@ var blogs = []Blog{
 	{
 		Title:   "Samsul Rijal",
 		Content: "Hallo Dumbways",
-		PostAt:  "24 November 2022",
-		Author:  "Samsul Rijal",
+		// Post_date: "24 November 2022",
+		Author: "Samsul Rijal",
 	},
 }
 
@@ -59,8 +66,8 @@ func addBlog(w http.ResponseWriter, r *http.Request) {
 	var newBlog = Blog{
 		Title:   title,
 		Content: content,
-		PostAt:  "24 November 2022",
-		Author:  "Samsul Rijal",
+		// Post_date: "24 November 2022",
+		Author: "Samsul Rijal",
 	}
 
 	// blogs.push(newBlog)
@@ -79,12 +86,32 @@ func blog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fmt.Println(blogs)
-	dataBlog := map[string]interface{}{
-		"Blogs": blogs,
+	dataBlog, errQuery := connection.Conn.Query(context.Background(), "SELECT id, title, content, post_date  FROM tb_blog")
+	if errQuery != nil {
+		fmt.Println("Message : " + errQuery.Error())
+		return
 	}
 
-	tmpt.Execute(w, dataBlog)
+	var result []Blog
+
+	for dataBlog.Next() {
+		var each = Blog{}
+
+		err := dataBlog.Scan(&each.ID, &each.Title, &each.Content, &each.Post_date)
+		if err != nil {
+			fmt.Println("Message : " + err.Error())
+			return
+		}
+
+		result = append(result, each)
+	}
+
+	fmt.Println(result)
+	resData := map[string]interface{}{
+		"Blogs": result,
+	}
+
+	tmpt.Execute(w, resData)
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -133,10 +160,10 @@ func blogDetail(w http.ResponseWriter, r *http.Request) {
 	for index, data := range blogs {
 		if index == id {
 			BlogDetail = Blog{
-				Title:   data.Title,
-				Content: data.Content,
-				PostAt:  data.PostAt,
-				Author:  data.Author,
+				Title:     data.Title,
+				Content:   data.Content,
+				Post_date: data.Post_date,
+				Author:    data.Author,
 			}
 		}
 	}
