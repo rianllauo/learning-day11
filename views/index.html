@@ -22,10 +22,29 @@
                 </ul>
             </div>
 
+            <div>
+                <ul>
+                    {{if .IsLogin}}
+                    <li><a href="">Hello, {{.UserName}}</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                    {{else}}
+                    <li><a href="/register">Register</a></li>
+                    <li><a href="/login">Login</a></li>
+                    <li>{{.IsLogin}}</li>
+                    {{end}}
+                </ul>
+            </div>
+
             <div class="nav-right">
                 <a href="contact.html">Contact</a>
             </div>
         </nav>
+
+        {{if .FlashData}}
+        <div>
+            {{.FlashData}}
+        </div>
+        {{end}}
 
         <div class="container">
 

@@ -72,13 +72,13 @@
         <div class="blog-content">
           <div class="btn-group">
             <a href="#" class="btn-edit">Edit Post</a>
-            <a href="/delete-blog/{{$index}}" class="btn-post">Delete Blog</a>
+            <a href="/delete-blog/{{$data.ID}}" class="btn-post">Delete Blog</a>
           </div>
           <h1>
-            <a href="/blog-detail/{{$index}}" target="_blank">{{$data.Title}}</a>
+            <a href="/blog-detail/{{$data.ID}}" >{{$data.Title}}</a>
           </h1>
           <div class="detail-blog-content">
-            {{$data.Post_date}} | {{$data.Author}}
+            {{$data.Format_date}} | {{$data.Author}}
           </div>
           <p>
             {{$data.Content}}
